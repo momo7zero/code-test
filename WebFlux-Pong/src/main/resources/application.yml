@@ -1,2 +1,47 @@
 server:
   port: 8080
+
+logging:
+  config: classpath:logback-spring.xml
+
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.60.40:55552/test?currentSchema=test
+    username: developer
+    password: developer#nk2ode
+    filters: stat
+    web-stat-filter:
+      enabled: true
+      url-pattern: /*
+      exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+      profile-enable: true
+    stat-view-servlet:
+      enabled: true
+      url-pattern: /druid/*
+      reset-enable: true
+    filter:
+      stat:
+        log-slow-sql: false
+  kafka:
+    consumer:
+      bootstrap-servers: 192.168.60.101:9092,192.168.60.102:9092,192.168.60.103:9092
+      enable-auto-commit: true
+      auto-commit-interval: 100ms
+      group-id: dop
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 1
+      properties:
+        sasl:
+          mechanism: SCRAM-SHA-512
+          jaas:
+            config: org.apache.kafka.common.security.scram.ScramLoginModule required username='kafka_local' password='kafka@local#2o';
+        security:
+          protocol: SASL_PLAINTEXT
+      auto-offset-reset: earliest
+    properties:
+      max:
+        poll:
+          interval:
+            ms: 900000

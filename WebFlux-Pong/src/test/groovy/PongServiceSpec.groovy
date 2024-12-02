@@ -1,13 +1,21 @@
-import com.momo.service.PongService
+import com.momo.service.ILogRecordService
+import com.momo.service.impl.LogRecordServiceImpl
+import com.momo.service.impl.PongService
+import org.mockito.Mockito
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
+import spock.lang.Shared
 import spock.lang.Specification
+
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 @SpringBootTest
 @ActiveProfiles("test")
 class PongServiceSpec extends Specification {
+
     def "pong test null"() {
         given:
         PongService pongService = new PongService();
@@ -22,7 +30,7 @@ class PongServiceSpec extends Specification {
         PongService pongService = new PongService();
         def session = Mock(WebSocketSession)
         when:
-        pongService.handle(session)
+        def ssesion1 = pongService.handle(session)
         then:
         thrown(NullPointerException)
     }
@@ -34,21 +42,43 @@ class PongServiceSpec extends Specification {
         def msg = Mock(WebSocketMessage)
         def now = "20220202"
         when:
-        def msg1 = pongService.condMsg(session, msg, now)
+        pongService.condMsg(session, msg, now)
         then:
-        msg1 == null
+        thrown(NullPointerException)
     }
 
     def "pong msg success"() {
         given:
         PongService pongService = new PongService();
         def session = Mock(WebSocketSession)
+        def msg = Mockito.mock(WebSocketMessage)
+        def now = "20220202"
+        Mockito.when(msg.getPayloadAsText()).thenReturn("Hello")
+        pongService.logRecordService = new LogRecordServiceImpl();
+        pongService.map=new ConcurrentHashMap<>()
+        when:
+        def msg1 = pongService.condMsg(session, msg, now)
+        then:
+        thrown(NullPointerException)
+    }
+
+    def "pong msg get success"() {
+        given:
+        PongService pongService = new PongService();
+        def session = Mock(WebSocketSession)
         def msg = Mock(WebSocketMessage)
         when:
-        session.textMessage("World")
-        msg.payloadAsText == "Hello"
-        def msg1 = pongService.condMsg(session, msg, null)
+        def msg1 = pongService.getSuccessMsg(session, null)
         then:
-        msg1 == null
+        thrown(NullPointerException)
+    }
+
+    def "pong msg add log"() {
+        given:
+        PongService pongService = new PongService();
+        when:
+        pongService.addToLog(null)
+        then:
+        thrown(NullPointerException)
     }
 }

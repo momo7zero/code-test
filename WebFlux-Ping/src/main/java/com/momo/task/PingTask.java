@@ -1,5 +1,7 @@
-package com.momo.service;
+package com.momo.task;
 
+import com.momo.service.ILogRecordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,7 +19,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
-public class PingService {
+public class PingTask {
+    @Autowired
+    private ILogRecordService logRecordService;
+
     /**
      * 1 sec to ping
      */
@@ -51,13 +56,10 @@ public class PingService {
                     lock.release();
                 }
             } else {
-                System.out.println("rate limit");
-                if (lock != null && lock.isValid()) {
-                    lock.release();
-                }
+                rateLimit(lock);
             }
-        } catch (IOException e) {
-            System.out.println("send ping err!");
+        } catch (Exception e) {
+            logRecordService.addLog("send ping err!");
         } finally {
             try {
                 if (file != null) {
@@ -68,13 +70,20 @@ public class PingService {
         }
     }
 
+    private void rateLimit(FileLock lock) throws IOException {
+        logRecordService.addLog("rate limit");
+        if (lock != null && lock.isValid()) {
+            lock.release();
+        }
+    }
+
     private void toPong() {
         WebSocketClient client = new ReactorNettyWebSocketClient();
-        System.out.println("send Hello to Pong server!");
+        logRecordService.addLog("send Hello to Pong server!");
         client.execute(URI.create("ws://localhost:8080/pong"), session -> session.send(Flux.just(session.textMessage("Hello")))
                 .thenMany(session.receive().take(1).map(WebSocketMessage::getPayloadAsText))
-                .doOnNext(s -> System.out.println("received msg:" + s))
+                .doOnNext(s -> logRecordService.addLog("received msg:" + s))
                 .then()
-        ).onTerminateDetach().doOnError(throwable -> System.out.println("error!")).subscribe();
+        ).onTerminateDetach().doOnError(throwable -> logRecordService.addLog("error!")).subscribe();
     }
 }

@@ -1,2 +1,28 @@
 server:
-  port: 8084
+  port: 8085
+
+logging:
+  config: classpath:logback-spring.xml
+
+spring:
+  kafka:
+    producer:
+      bootstrap-servers: 192.168.60.101:9092,192.168.60.102:9092,192.168.60.103:9092
+      acks: all
+      retries: 0
+      batch-size: 4096
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      kafka-partition-num: 1
+      properties:
+        sasl:
+          mechanism: SCRAM-SHA-512
+          jaas:
+            config: org.apache.kafka.common.security.scram.ScramLoginModule required username='kafka_local' password='kafka@local#2o';
+        security:
+          protocol: SASL_PLAINTEXT
+    properties:
+      max:
+        poll:
+          interval:
+            ms: 900000

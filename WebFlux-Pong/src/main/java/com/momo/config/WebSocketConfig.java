@@ -1,6 +1,6 @@
 package com.momo.config;
 
-import com.momo.service.PongService;
+import com.momo.service.impl.PongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

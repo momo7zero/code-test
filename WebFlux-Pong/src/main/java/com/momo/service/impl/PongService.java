@@ -1,5 +1,8 @@
-package com.momo.service;
+package com.momo.service.impl;
 
+import com.momo.config.Constants;
+import com.momo.service.ILogRecordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -13,7 +16,10 @@ import java.util.concurrent.ConcurrentMap;
 
 @Component
 public class PongService implements WebSocketHandler {
-    public final ConcurrentMap<String, Boolean> map = new ConcurrentHashMap();
+    @Autowired
+    private ILogRecordService logRecordService;
+
+    public ConcurrentMap<String, Boolean> map = new ConcurrentHashMap();
 
     @Override
     public Mono<Void> handle(WebSocketSession webSocketSession) {
@@ -29,13 +35,22 @@ public class PongService implements WebSocketHandler {
     public WebSocketMessage condMsg(WebSocketSession webSocketSession, WebSocketMessage msg, String now) {
         String str = msg.getPayloadAsText();
         if ("Hello".equals(str) && map.get(now) == null) {
-            msg = webSocketSession.textMessage("World");
-            System.out.println("success");
-            map.put(now, true);
+            msg = getSuccessMsg(webSocketSession, now);
         } else {
             msg = webSocketSession.textMessage("Err Code 429");
-            System.out.println("code 429");
+            addToLog("code 429");
         }
         return msg;
+    }
+
+    private WebSocketMessage getSuccessMsg(WebSocketSession webSocketSession, String now) {
+        WebSocketMessage msg = webSocketSession.textMessage("World");
+        map.put(now, true);
+        addToLog("success");
+        return msg;
+    }
+
+    public void addToLog(String msg) {
+        logRecordService.addLog(Constants.LOG_TYPE_PONG, msg);
     }
 }
