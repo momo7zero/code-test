@@ -21,7 +21,6 @@ public class KafkaConsumer {
      * 消费处理者
      * @param records
      */
-
     @KafkaListener(topics = {"dataware_to_msb_out"})
     public void handler(String records) {
         this.logRecordService.addLog(Constants.LOG_TYPE_PING,records);

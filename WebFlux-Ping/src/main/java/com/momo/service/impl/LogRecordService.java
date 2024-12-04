@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 public class LogRecordService implements ILogRecordService {
     @Autowired
     private KafkaProducer kafkaProducer;
+    @Autowired
+    private Constants constants;
 
     @Override
     public void addLog(String logInfo) {
+        logInfo = constants.getPort() + "-" + logInfo;
         log.info("=====ping log:{}", logInfo);
         this.kafkaProducer.send(Constants.KAFKA_TOPIC, logInfo);
     }
