@@ -30,7 +30,7 @@ class PingTaskSpec extends Specification {
         thrown(NullPointerException)
     }
 
-    def "test ping func"() {
+    def "test ping checkFileLock"() {
         given:
         def pingService = new PingTask();
         def service = pingService.logRecordService = new LogRecordService()

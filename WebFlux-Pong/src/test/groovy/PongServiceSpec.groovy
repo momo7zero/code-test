@@ -35,7 +35,7 @@ class PongServiceSpec extends Specification {
         thrown(NullPointerException)
     }
 
-    def "pong msg"() {
+    def "pong msg test"() {
         given:
         PongService pongService = new PongService();
         def session = Mock(WebSocketSession)
@@ -47,7 +47,7 @@ class PongServiceSpec extends Specification {
         thrown(NullPointerException)
     }
 
-    def "pong msg success"() {
+    def "pong msg get err 429"() {
         given:
         PongService pongService = new PongService();
         def session = Mock(WebSocketSession)
